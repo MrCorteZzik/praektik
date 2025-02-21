@@ -15,6 +15,14 @@
         <li>
             <a href="profile/" class="btn btn-primary">Страница профиля</a>
         </li>
+        <li>
+            <a href="product-add/" class="btn btn-primary">Добавить товар</a>
+        </li>
+        {% if messages %}
+            {% for message in messages %}
+                <p style="color: red;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
     </ul>
 </body>
 </html>

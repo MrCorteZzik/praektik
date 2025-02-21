@@ -6,7 +6,15 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from .models import Seller, Product
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import user_passes_test
 
+def product_add_page(request):
+    user = Seller.objects.get(user_id=request.user.id)
+    if not user.is_seller:
+        messages.error(request, "Вы не можете добавлять товары!")
+        return redirect("home_page")
+    else:
+        return render(request, "product_add_page.html")
 def home_page(request):
     return render(request, 'index.html')
 
@@ -60,6 +68,9 @@ def registration_page(request):
 
         if is_seller == "on":
             seller = Seller.objects.create(user=user, is_seller=True)
+            seller.save()
+        else:
+            seller = Seller.objects.create(user=user, is_seller=False)
             seller.save()
 
         login(request, user)
