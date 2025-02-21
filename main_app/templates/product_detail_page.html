@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }}</title>
+</head>
+<body>
+
+    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
+
+    <h1>{{ product.name }}</h1>
+    <p>Цена: {{ product.price }} руб.</p>
+    <p>Описание: {{ product.description }}</p>
+
+</body>
+</html>
