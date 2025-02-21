@@ -59,7 +59,7 @@ def registration_page(request):
         user.save()
 
         if is_seller == "on":
-            seller = Seller.objects.create(user=user)
+            seller = Seller.objects.create(user=user, is_seller=True)
             seller.save()
 
         login(request, user)
