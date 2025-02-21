@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+</head>
+<body>
+    <h2>Вход в аккаунт</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: red;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Логин:</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>Пароль:</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">Войти</button>
+    </form>
+
+    <p>Нет аккаунта? <a href="{% url 'registration_page' %}">Зарегистрироваться</a></p>
+</body>
+</html>
