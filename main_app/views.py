@@ -6,7 +6,6 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from .models import Seller, Product
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import user_passes_test
 
 def product_add_page(request):
     user = Seller.objects.get(user_id=request.user.id)
@@ -14,11 +13,21 @@ def product_add_page(request):
         messages.error(request, "Вы не можете добавлять товары!")
         return redirect("home_page")
     else:
+        if request.method == "POST":
+            name = request.POST.get("name")
+            description = request.POST.get("description")
+            category = request.POST.get("category")
+            price = request.POST.get("price")
+            stock = request.POST.get("stock")
+
+            product = Product.objects.create(name=name, description=description, price=price, stock=stock, category=category, seller_id=request.user.id)
+            product.save()
+
+            messages.success(request, "Товар успешно добавлен!")
         return render(request, "product_add_page.html")
 def home_page(request):
     return render(request, 'index.html')
 
-@login_required(login_url='login_page')
 def profile_page(request):
     return render(request, 'profile_page.html')
 

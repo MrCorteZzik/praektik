@@ -5,6 +5,33 @@
     <title>Title</title>
 </head>
 <body>
+    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Название:</label>
+        <input type="text" name="name" required>
+        <br>
+        <label>Описание:</label>
+        <input type="text" name="description" required>
+        <br>
+        <label>Категория:</label>
+        <input type="text" name="category" required>
+        <br>
+        <label>Цена:</label>
+        <input type="number" name="price" required>
+        <br>
+        <label>Количество:</label>
+        <input type="number" name="stock" required>
+        <br>
+        <button type="submit">Добавить</button>
+    </form>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: #15d915;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
 
 </body>
 </html>

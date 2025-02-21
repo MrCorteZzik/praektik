@@ -5,13 +5,9 @@
     <title>Регистрация</title>
 </head>
 <body>
-    <h2>Регистрация</h2>
+    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
 
-    {% if messages %}
-        {% for message in messages %}
-            <p style="color: red;">{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+    <h2>Регистрация</h2>
 
     <form method="post">
         {% csrf_token %}
@@ -33,5 +29,11 @@
     </form>
 
     <p>Уже есть аккаунт? <a href="{% url 'login_page' %}">Войти</a></p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: red;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
 </body>
 </html>
