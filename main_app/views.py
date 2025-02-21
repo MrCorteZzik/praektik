@@ -7,15 +7,12 @@ from django.contrib.auth import login, logout
 from .models import Seller, Product
 from django.contrib.auth.models import User
 
-
-
-# Create your views here.
 def home_page(request):
     return render(request, 'index.html')
 
 @login_required(login_url='login_page')
 def profile_page(request):
-    return render(request, 'porfile_page.html')
+    return render(request, 'profile_page.html')
 
 def login_page(request):
     if request.user.is_authenticated:
