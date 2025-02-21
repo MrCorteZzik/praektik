@@ -50,7 +50,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'praekt_true.urls'
+ROOT_URLCONF = 'praektik.urls'
 
 TEMPLATES = [
     {
@@ -68,7 +68,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'praekt_true.wsgi.application'
+WSGI_APPLICATION = 'praektik.wsgi.application'
 
 
 # Database
