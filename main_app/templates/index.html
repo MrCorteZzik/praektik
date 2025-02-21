@@ -18,11 +18,16 @@
         <li>
             <a href="product-add/" class="btn btn-primary">Добавить товар</a>
         </li>
-        {% if messages %}
-            {% for message in messages %}
-                <p style="color: red;">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
+        <li>
+            <a href="product-list/" class="btn btn-primary">Все товары</a>
+        </li>
     </ul>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: red;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
 </body>
 </html>

@@ -1,5 +1,4 @@
 from django.contrib.auth import authenticate
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from pyexpat.errors import messages
 from django.contrib import messages
@@ -43,7 +42,7 @@ def login_page(request):
 
         if user is not None:
             login(request, user)
-            return redirect("profile_page")
+            return redirect("home_page")
         else:
             messages.error(request, "Неверный логин или пароль!")
 
@@ -83,10 +82,18 @@ def registration_page(request):
             seller.save()
 
         login(request, user)
-        return redirect("profile_page")
+        return redirect("home_page")
 
     return render(request, "registration_page.html")
 
 def logout_page(request):
     logout(request)
     return redirect('home_page')
+
+
+def product_list_page(request):
+    products = Product.objects.all()
+    if not request.user.is_authenticated:
+        return redirect("login_page")
+    else:
+        return render(request, 'product_list_page.html', {'products': products})

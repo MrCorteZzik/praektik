@@ -1,0 +1,21 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+</head>
+<body>
+
+    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
+
+    <h2>Все товары</h2>
+    <ul>
+        {% for product in products %}
+            <il>
+                {{ product.name }} - {{ product.price }}
+            </il>
+            <br>
+        {% endfor %}
+    </ul>
+</body>
+</html>
