@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
+
+    <h2>Корзина</h2>
+
+    <ul>
+            {% for item in cart_items %}
+                <il>
+                    {{ item.product.name }} - {{ item.product.price }} руб. - {{ item.quantity }} шт. Итого: {{ item.total_price }}
+                    <br>
+                    <a href="{% url 'product_remove_from_cart' item.product.id %}">Удалить</a>
+                    <a href="{% url 'product_remove_one_from_cart' item.product.id %}">Убрать</a>
+                    <a href="{% url 'product_add_one_to_cart' item.product.id %}">Добавить</a>
+                    <br>
+                </il>
+            {% endfor %}
+    </ul>
+</body>
+</html>

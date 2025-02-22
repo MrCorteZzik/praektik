@@ -13,5 +13,7 @@
     <p>Цена: {{ product.price }} руб.</p>
     <p>Описание: {{ product.description }}</p>
 
+    <button><a href="{% url 'product_add_to_cart' product.id %}">Добавить в корзину</a></button>
+
 </body>
 </html>

@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from pyexpat.errors import messages
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from .models import Seller, Product
+from .models import Seller, Product, CartItem
 from django.contrib.auth.models import User
 
 def product_add_page(request):
@@ -24,6 +24,7 @@ def product_add_page(request):
 
             messages.success(request, "Товар успешно добавлен!")
         return render(request, "product_add_page.html")
+
 def home_page(request):
     return render(request, 'index.html')
 
@@ -90,14 +91,12 @@ def logout_page(request):
     logout(request)
     return redirect('home_page')
 
-
 def product_list_page(request):
     products = Product.objects.all()
     if not request.user.is_authenticated:
         return redirect("login_page")
     else:
         return render(request, 'product_list_page.html', {'products': products})
-
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -106,6 +105,78 @@ def product_detail(request, product_id):
     else:
         return redirect("login_page")
 
-
 def product_detail_empty(request):
     return redirect('product_list_page')
+
+def cart_page(request):
+    if not request.user.is_authenticated:
+        return redirect("login_page")
+
+    cart_items = CartItem.objects.filter(user_id=request.user.id)
+
+    if cart_items.exists():
+        return render(request, 'cart_page.html', {'cart_items': cart_items})
+    else:
+        return render(request, 'cart_page.html', {'cart_items': None})
+
+def product_add_to_cart(request, product_id):
+    if not request.user.is_authenticated:
+        return redirect("login_page")
+
+    product = get_object_or_404(Product, id=product_id)
+
+    if CartItem.objects.filter(user=request.user, product=product).exists():
+        cart_item = CartItem.objects.filter(user=request.user, product=product)
+        for item in cart_item:
+            item.quantity += 1
+            item.save()
+    else:
+        cart_item = CartItem.objects.create(user=request.user, product=product)
+        cart_item.save()
+
+    return redirect("cart_page")
+
+
+def product_remove_from_cart(request, product_id):
+    if not request.user.is_authenticated:
+        return redirect("login_page")
+
+    product = get_object_or_404(Product, id=product_id)
+
+    if CartItem.objects.filter(user=request.user, product=product).exists():
+        cart_item = CartItem.objects.filter(user=request.user, product=product)
+        for item in cart_item:
+            item.delete()
+
+    return redirect("cart_page")
+
+def product_remove_one_from_cart(request, product_id):
+    if not request.user.is_authenticated:
+        return redirect("login_page")
+
+    product = get_object_or_404(Product, id=product_id)
+
+    if CartItem.objects.filter(user=request.user, product=product).exists():
+        cart_item = CartItem.objects.filter(user=request.user, product=product)
+        for item in cart_item:
+            if item.quantity > 1:
+                item.quantity -= 1
+                item.save()
+            else:
+                item.delete()
+
+    return redirect("cart_page")
+
+def product_add_one_to_cart(request, product_id):
+    if not request.user.is_authenticated:
+        return redirect("login_page")
+
+    product = get_object_or_404(Product, id=product_id)
+
+    if CartItem.objects.filter(user=request.user, product=product).exists():
+        cart_item = CartItem.objects.filter(user=request.user, product=product)
+        for item in cart_item:
+            item.quantity += 1
+            item.save()
+
+    return redirect("cart_page")
