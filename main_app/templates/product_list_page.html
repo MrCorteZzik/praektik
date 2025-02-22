@@ -12,7 +12,7 @@
     <ul>
         {% for product in products %}
             <il>
-                {{ product.name }} - {{ product.price }} <a href="{% url 'product_detail' product.id %}">Подробнее</a>
+                {{ product.name }} - {{ product.price }} <a href="{% url 'product_detail_page' product.id %}">Подробнее</a>
             </il>
             <br>
         {% endfor %}

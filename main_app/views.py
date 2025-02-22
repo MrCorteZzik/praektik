@@ -105,3 +105,7 @@ def product_detail(request, product_id):
         return render(request, 'product_detail_page.html', {'product': product})
     else:
         return redirect("login_page")
+
+
+def product_detail_empty(request):
+    return redirect('product_list_page')
