@@ -15,8 +15,8 @@
                     {{ item.product.name }} - {{ item.product.price }} руб. - {{ item.quantity }} шт. Итого: {{ item.total_price }}
                     <br>
                     <a href="{% url 'product_remove_from_cart' item.product.id %}">Удалить</a>
-                    <a href="{% url 'product_remove_one_from_cart' item.product.id %}">Убрать</a>
-                    <a href="{% url 'product_add_one_to_cart' item.product.id %}">Добавить</a>
+                    <a href="{% url 'product_remove_one_from_cart' item.product.id %}">-</a>
+                    <a href="{% url 'product_add_one_to_cart' item.product.id %}">+</a>
                     <br>
                 </il>
             {% endfor %}
