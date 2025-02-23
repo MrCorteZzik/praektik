@@ -166,10 +166,8 @@ def product_add_one_to_cart(request, product_id):
 
     product = get_object_or_404(Product, id=product_id)
 
-    if CartItem.objects.filter(user=request.user, product=product).exists():
-        cart_item = CartItem.objects.filter(user=request.user, product=product)
-        for item in cart_item:
-            item.quantity += 1
-            item.save()
+    cart_item = CartItem.objects.get(user=request.user, product=product)
+    cart_item.quantity += 1 if cart_item.quantity < product.stock else messages.error(request, "Недостаточно товара в наличии!")
+    cart_item.save()
 
     return redirect("cart_page")
