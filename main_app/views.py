@@ -33,7 +33,7 @@ def profile_page(request):
 
 def login_page(request):
     if request.user.is_authenticated:
-        return redirect("profile_page")
+        return redirect("home_page")
 
     if request.method == "POST":
         username = request.POST.get("username")
