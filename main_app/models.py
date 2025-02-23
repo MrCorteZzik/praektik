@@ -22,3 +22,10 @@ class CartItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     def total_price(self):
         return self.product.price * self.quantity
+
+class Checkout(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cart_items = models.ManyToManyField(CartItem)
+    def total_price(self):
+        return sum(item.total_price() for item in self.cart_items.all())

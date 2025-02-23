@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from pyexpat.errors import messages
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from .models import Seller, Product, CartItem
+from .models import Seller, Product, CartItem, Checkout
 from django.contrib.auth.models import User
 
 def product_add_page(request):
@@ -171,3 +171,34 @@ def product_add_one_to_cart(request, product_id):
     cart_item.save()
 
     return redirect("cart_page")
+
+def checkout_page(request):
+    if not request.user.is_authenticated:
+        return redirect("login_page")
+
+    cart_items = CartItem.objects.filter(user_id=request.user.id)
+
+    if cart_items is None:
+        return redirect("cart_page")
+
+    checkout = Checkout.objects.create(user=request.user, cart_items=cart_items)
+    checkout.save()
+
+    return render(request, 'checkout_page.html', {'checkout': checkout})
+
+def checkout_success(request, checkout_id):
+    if not request.user.is_authenticated:
+        return redirect("login_page")
+
+    checkout = get_object_or_404(Checkout, id=checkout_id)
+    cart_items = checkout.cart_items.all()
+
+    products = []
+    for item in cart_items:
+        products.append(item.product)
+
+    for product in products:
+        product.stock -= CartItem.objects.get(user=request.user, product=product).quantity
+        product.save()
+
+    return render(request, 'checkout_success_page.html', {'checkout': checkout, 'products': products})

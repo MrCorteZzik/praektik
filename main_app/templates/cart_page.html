@@ -12,6 +12,7 @@
     <ul>
         {% if cart_items is None %}
             <il>Корзина пуста</il>
+            <il><a href="{% url 'product_list_page' %}">Все товары</a></il>
         {% else %}
             {% for item in cart_items %}
                 <il>
@@ -20,10 +21,16 @@
                     <a href="{% url 'product_remove_from_cart' item.product.id %}">Удалить</a>
                     <a href="{% url 'product_remove_one_from_cart' item.product.id %}">Убрать</a>
                     <a href="{% url 'product_add_one_to_cart' item.product.id %}">Добавить</a>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <p style="color: red;">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
                     <br>
                 </il>
             {% endfor %}
         {% endif %}
     </ul>
+    <h2><a href="{% url 'checkout_page' %}">Оформить заказ</a></h2>
 </body>
 </html>
