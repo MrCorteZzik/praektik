@@ -8,11 +8,11 @@
 
     <h2><a href="{% url 'home_page' %}">На главную</a></h2>
 
-    <h2>Все товары</h2>
+    <h1>Все товары</h1>
     <ul>
         {% for product in products %}
             <il>
-                {{ product.name }} - {{ product.price }} <a href="{% url 'product_detail_page' product.id %}">Подробнее</a>
+                {{ product.name }} - {{ product.price }} В наличии: {{ product.stock }} <a href="{% url 'product_detail_page' product.id %}">Подробнее</a>
             </il>
             <br>
         {% endfor %}

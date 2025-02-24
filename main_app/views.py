@@ -3,27 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from pyexpat.errors import messages
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from .models import Seller, Product, CartItem, Checkout
+from .models import Seller, Product, CartItem, Order
 from django.contrib.auth.models import User
-
-def product_add_page(request):
-    user = Seller.objects.get(user_id=request.user.id)
-    if not user.is_seller:
-        messages.error(request, "Вы не можете добавлять товары!")
-        return redirect("home_page")
-    else:
-        if request.method == "POST":
-            name = request.POST.get("name")
-            description = request.POST.get("description")
-            category = request.POST.get("category")
-            price = request.POST.get("price")
-            stock = request.POST.get("stock")
-
-            product = Product.objects.create(name=name, description=description, price=price, stock=stock, category=category, seller_id=request.user.id)
-            product.save()
-
-            messages.success(request, "Товар успешно добавлен!")
-        return render(request, "product_add_page.html")
 
 def home_page(request):
     return render(request, 'index.html')
@@ -91,6 +72,25 @@ def logout_page(request):
     logout(request)
     return redirect('home_page')
 
+def product_add_page(request):
+    user = Seller.objects.get(user_id=request.user.id)
+    if not user.is_seller:
+        messages.error(request, "Вы не можете добавлять товары!")
+        return redirect("home_page")
+    else:
+        if request.method == "POST":
+            name = request.POST.get("name")
+            description = request.POST.get("description")
+            category = request.POST.get("category")
+            price = request.POST.get("price")
+            stock = request.POST.get("stock")
+
+            product = Product.objects.create(name=name, description=description, price=price, stock=stock, category=category, seller_id=request.user.id)
+            product.save()
+
+            messages.success(request, "Товар успешно добавлен!")
+        return render(request, "product_add_page.html")
+
 def product_list_page(request):
     products = Product.objects.all()
     if not request.user.is_authenticated:
@@ -105,14 +105,11 @@ def product_detail(request, product_id):
     else:
         return redirect("login_page")
 
-def product_detail_empty(request):
-    return redirect('product_list_page')
-
 def cart_page(request):
     if not request.user.is_authenticated:
         return redirect("login_page")
 
-    cart_items = CartItem.objects.filter(user_id=request.user.id)
+    cart_items = CartItem.objects.filter(user_id=request.user.id, status=True)
 
     if cart_items.exists():
         return render(request, 'cart_page.html', {'cart_items': cart_items})
@@ -125,8 +122,11 @@ def product_add_to_cart(request, product_id):
 
     product = get_object_or_404(Product, id=product_id)
 
-    if CartItem.objects.filter(user=request.user, product=product).exists():
-        cart_item = CartItem.objects.filter(user=request.user, product=product)
+    if product.stock == 0:
+        messages.error(request, "Недостаточно товара в наличии!")
+        return redirect("product_detail_page", product_id=product_id)
+    if CartItem.objects.filter(user=request.user, product=product, status=True).exists():
+        cart_item = CartItem.objects.filter(user=request.user, product=product, status=True)
         for item in cart_item:
             item.quantity += 1
             item.save()
@@ -143,7 +143,7 @@ def product_remove_from_cart(request, product_id):
 
     product = get_object_or_404(Product, id=product_id)
 
-    cart_item = CartItem.objects.get(user=request.user, product=product)
+    cart_item = CartItem.objects.get(user=request.user, product=product, status=True)
     cart_item.delete()
 
     return redirect("cart_page")
@@ -154,12 +154,12 @@ def product_remove_one_from_cart(request, product_id):
 
     product = get_object_or_404(Product, id=product_id)
 
-    cart_item = CartItem.objects.get(user=request.user, product=product)
+    cart_item = CartItem.objects.get(user=request.user, product=product, status=True)
     if cart_item.quantity > 1:
         cart_item.quantity -= 1
+        cart_item.save()
     else:
         cart_item.delete()
-    cart_item.save()
 
     return redirect("cart_page")
 
@@ -169,42 +169,47 @@ def product_add_one_to_cart(request, product_id):
 
     product = get_object_or_404(Product, id=product_id)
 
-    cart_item = CartItem.objects.get(user=request.user, product=product)
+    cart_item = CartItem.objects.get(user=request.user, product=product, status=True)
     if cart_item.quantity < product.stock:
         cart_item.quantity += 1
+        cart_item.save()
     else:
         messages.error(request, "Недостаточно товара в наличии!")
-    cart_item.save()
 
     return redirect("cart_page")
 
-def checkout_page(request):
+def order_page(request):
     if not request.user.is_authenticated:
         return redirect("login_page")
 
-    cart_items = CartItem.objects.filter(user_id=request.user.id)
+    if Order.objects.filter(user=request.user, status='created').exists():
+        order = Order.objects.get(user=request.user, status='created')
+        return render(request, 'order_page.html', {'order': order})
+    else:
+        order = Order.objects.create(user=request.user)
+        CartItem.objects.filter(user=request.user, status=True).update(order=order)
+        order.save()
+        return render(request, 'order_page.html', {'order': order})
 
-    if cart_items is None:
-        return redirect("cart_page")
 
-    checkout = Checkout.objects.create(user=request.user, cart_items=cart_items)
-    checkout.save()
-
-    return render(request, 'checkout_page.html', {'checkout': checkout})
-
-def checkout_success(request, checkout_id):
+def order_success_page(request, order_id):
     if not request.user.is_authenticated:
         return redirect("login_page")
 
-    checkout = get_object_or_404(Checkout, id=checkout_id)
-    cart_items = checkout.cart_items.all()
+    order = get_object_or_404(Order, id=order_id)
+    order.status = 'in_progress'
+    order.save()
+
+    cart_items = CartItem.objects.filter(order=order)
 
     products = []
     for item in cart_items:
         products.append(item.product)
 
     for product in products:
-        product.stock -= CartItem.objects.get(user=request.user, product=product).quantity
+        product.stock -= CartItem.objects.get(user=request.user, product=product, status=True).quantity
         product.save()
 
-    return render(request, 'checkout_success_page.html', {'checkout': checkout, 'products': products})
+    CartItem.objects.filter(user=request.user).update(status=False)
+
+    return render(request, 'order_success_page.html', {'order': order})

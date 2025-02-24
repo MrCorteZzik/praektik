@@ -16,16 +16,21 @@ class Seller(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     is_seller = models.BooleanField(default=False)
 
+class Order(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(default='created', max_length=20)
+    def order_total_price(self):
+        res = 0
+        for item in CartItem.objects.filter(order=self):
+            res += item.cart_item_total_price()
+        return res
+
 class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
-    def total_price(self):
+    status = models.BooleanField(default=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    def cart_item_total_price(self):
         return self.product.price * self.quantity
-
-class Checkout(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    cart_items = models.ManyToManyField(CartItem)
-    def total_price(self):
-        return sum(item.total_price() for item in self.cart_items.all())

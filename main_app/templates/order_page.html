@@ -10,8 +10,9 @@
 
     <h2>Оформление заказа</h2>
 
-    <il> Итого: {{ checkout.total_price }} </il>
-    <il><a href="{% url 'checkout_success' checkout.id %}">Оформить</a></il>
+    <il> Итого: {{ order.order_total_price }} </il>
+    <br>
+    <il><a href="{% url 'order_success_page' order.id %}">Оформить</a></il>
 
 </body>
 </html>

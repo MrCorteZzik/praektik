@@ -7,30 +7,31 @@
 <body>
     <h2><a href="{% url 'home_page' %}">На главную</a></h2>
 
-    <h2>Корзина</h2>
+    <h1>Корзина</h1>
 
     <ul>
         {% if cart_items is None %}
-            <il>Корзина пуста</il>
-            <il><a href="{% url 'product_list_page' %}">Все товары</a></il>
+            <h3>Корзина пуста</h3>
+            <br>
+            <h2><a href="{% url 'product_list_page' %}">Все товары</a></h2>
         {% else %}
             {% for item in cart_items %}
                 <il>
-                    {{ item.product.name }} - {{ item.product.price }} руб. - {{ item.quantity }} шт. Итого: {{ item.total_price }}
+                    {{ item.product.name }} - {{ item.product.price }} руб. - {{ item.quantity }} шт. Итого: {{ item.cart_item_total_price }}
                     <br>
                     <a href="{% url 'product_remove_from_cart' item.product.id %}">Удалить</a>
                     <a href="{% url 'product_remove_one_from_cart' item.product.id %}">Убрать</a>
                     <a href="{% url 'product_add_one_to_cart' item.product.id %}">Добавить</a>
-                    {% if messages %}
-                        {% for message in messages %}
-                            <p style="color: red;">{{ message }}</p>
-                        {% endfor %}
-                    {% endif %}
                     <br>
                 </il>
             {% endfor %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p style="color: red;">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+            <h2><a href="{% url 'order_page' %}">Оформить заказ</a></h2>
         {% endif %}
     </ul>
-    <h2><a href="{% url 'checkout_page' %}">Оформить заказ</a></h2>
 </body>
 </html>
