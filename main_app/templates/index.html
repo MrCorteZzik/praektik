@@ -13,10 +13,14 @@
             <a href="registration/" class="btn btn-primary">Страница регистрации</a>
         </li>
         <li>
-            <a href="profile/" class="btn btn-primary">Страница профиля</a>
+            {% if user.is_authenticated %}
+                <a href='{% url 'profile_page' user.id %}' class="btn btn-primary">Страница профиля</a>
+            {% else %}
+                <a href='{% url 'not_authenticated_profile_page' %}' class="btn btn-primary">Страница профиля</a>
+            {% endif %}
         </li>
         <li>
-            <a href="product-add/" class="btn btn-primary">Добавить товар</a>
+            <a href="seller/product-add/" class="btn btn-primary">Добавить товар</a>
         </li>
         <li>
             <a href="product-list/" class="btn btn-primary">Все товары</a>
@@ -24,6 +28,11 @@
         <li>
             <a href="cart/" class="btn btn-primary">Корзина</a>
         </li>
+        {% if is_seller %}
+            <li>
+                <a href='{% url 'seller_page' user.id %}' class="btn btn-primary">Страницка продавца</a>
+            </li>
+        {% endif %}
     </ul>
 
     {% if messages %}

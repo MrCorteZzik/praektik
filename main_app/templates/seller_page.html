@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
+
+    {% if user.id == seller_id %}
+        {% for product in products %}
+            <il>
+                {{ product.name }} - {{ product.price }} руб. - {{ product.stock }} шт. <a href="{% url 'product_edit_page' product.id %}">Редактировать</a>
+            </il>
+            <br>
+        {% endfor %}
+        <button><a href="{% url 'product_add_page' %}">Добавить товар</a></button>
+    {% else %}
+        {% for product in products %}
+            <il>
+                {{ product.name }} - {{ product.price }} руб. - {{ product.stock }} шт.
+            </il>
+            <br>
+        {% endfor %}
+    {% endif %}
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: red;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

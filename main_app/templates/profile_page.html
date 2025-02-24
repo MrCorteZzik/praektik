@@ -7,12 +7,7 @@
 <body>
     <h2><a href="{% url 'home_page' %}">На главную</a></h2>
 
-    {% csrf_token %}
-    {% if user.is_authenticated %}
-        <p>Вы вошли как: {{ user.username }}</p>
-        <a href="{% url 'logout' %}">Выйти</a>
-    {% else %}
-        <a href="{% url 'login_page' %}">Войти</a> | <a href="{% url 'registration_page' %}">Регистрация</a>
-    {% endif %}
-</body>
+    <p>Вы вошли как: {{ user.username }}</p>
+    <a href="{% url 'logout' %}">Выйти</a>
+
 </html>

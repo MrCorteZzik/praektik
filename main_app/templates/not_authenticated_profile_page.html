@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
+    <h2>Вы не авторизованы</h2>
+    <br>
+    <a href="{% url 'login_page' %}">Войти</a> | <a href="{% url 'registration_page' %}">Регистрация</a>
+</body>
+</html>

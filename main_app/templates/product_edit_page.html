@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
+
+    <h1>Редактирование товара</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Наименование:</label>
+        <input type="text" name="product_name" placeholder="{{ product.name }}" required>
+        <br>
+        <label>Описание:</label>
+        <input type="text" name="product_description" placeholder="{{ product.description }}" required>
+        <br>
+        <label>Категория:</label>
+        <input type="text" name="product_category" placeholder="{{ product.category }}" required>
+        <br>
+        <label>Цена:</label>
+        <input type="number" name="product_price" placeholder="{{ product.price }}" required>
+        <br>
+        <label>Количество:</label>
+        <input type="number" name="product_stock" placeholder="{{ product.stock }}" required>
+        <br>
+        <button type="submit">Сохранить</button>
+    </form>
+
+</body>
+</html>

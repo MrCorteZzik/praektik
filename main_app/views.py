@@ -7,9 +7,18 @@ from .models import Seller, Product, CartItem, Order
 from django.contrib.auth.models import User
 
 def home_page(request):
-    return render(request, 'index.html')
+    if request.user.is_authenticated:
+        if Seller.objects.get(user_id=request.user.id).is_seller:
+            return render(request, 'index.html', {'is_seller': True})
+        else:
+            return render(request, 'index.html', {'is_seller': False})
+    else:
+        return render(request, 'index.html', {'is_seller': False})
 
-def profile_page(request):
+def not_authenticated_profile_page(request):
+    return render(request, 'not_authenticated_profile_page.html')
+
+def profile_page(request, user_id):
     return render(request, 'profile_page.html')
 
 def login_page(request):
@@ -213,3 +222,16 @@ def order_success_page(request, order_id):
     CartItem.objects.filter(user=request.user).update(status=False)
 
     return render(request, 'order_success_page.html', {'order': order})
+
+def seller_page(request, seller_id):
+    products = Product.objects.filter(seller_id=Seller.objects.get(user_id=seller_id).id)
+    return render(request, 'seller_page.html', {'products': products, 'seller_id': seller_id})
+
+def product_edit_page(request, product_id):
+    user = Seller.objects.get(user_id=request.user.id)
+    if not user.is_seller:
+        messages.error(request, "Вы не можете редактировать товары!")
+        return redirect("home_page")
+    else:
+        product = get_object_or_404(Product, id=product_id)
+        return render(request, 'product_edit_page.html', {'product': product})
