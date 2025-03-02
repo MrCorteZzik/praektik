@@ -82,6 +82,9 @@ def logout_page(request):
     return redirect('home_page')
 
 def product_add_page(request):
+    if not request.user.is_authenticated:
+        return redirect("login_page")
+
     user = Seller.objects.get(user_id=request.user.id)
     if not user.is_seller:
         messages.error(request, "Вы не можете добавлять товары!")
@@ -234,4 +237,20 @@ def product_edit_page(request, product_id):
         return redirect("home_page")
     else:
         product = get_object_or_404(Product, id=product_id)
+        if request.method == "POST":
+            name = request.POST.get("product_name")
+            description = request.POST.get("product_description")
+            category = request.POST.get("product_category")
+            price = request.POST.get("product_price")
+            stock = request.POST.get("product_stock")
+
+            product.name = name
+            product.description = description
+            product.category = category
+            product.price = price
+            product.stock = stock
+            product.save()
+
+            messages.success(request, "Товар успешно изменен!")
+            return redirect("seller_page", seller_id=user.id)
         return render(request, 'product_edit_page.html', {'product': product})
