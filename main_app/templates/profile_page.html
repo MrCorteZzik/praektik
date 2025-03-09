@@ -2,10 +2,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../static/styles/main.css" rel="stylesheet" />
     <title>Document</title>
 </head>
+<header>
+    <a href="{% url 'home_page' %}" class="home_button"></a>
+</header>
 <body>
-    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
+
+
 
     <p>Вы вошли как: {{ user.username }}</p>
     <a href="{% url 'logout' %}">Выйти!</a>
