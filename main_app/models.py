@@ -31,6 +31,6 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     status = models.BooleanField(default=True)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, default=-1)
     def cart_item_total_price(self):
         return self.product.price * self.quantity
