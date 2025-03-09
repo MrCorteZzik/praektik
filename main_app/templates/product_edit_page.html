@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Редактирование товара</title>
 </head>
 <body>
 
@@ -12,21 +12,27 @@
 
     <form method="post">
         {% csrf_token %}
-        <label>Наименование:</label>
-        <input type="text" name="product_name" placeholder="{{ product.name }}" required>
+
+        <label for="product_name">Наименование:</label>
+        <input type="text" id="product_name" name="product_name" value="{{ product.name }}" required>
         <br>
-        <label>Описание:</label>
-        <input type="text" name="product_description" placeholder="{{ product.description }}" required>
+
+        <label for="product_description">Описание:</label>
+        <textarea id="product_description" name="product_description" required>{{ product.description }}</textarea>
         <br>
-        <label>Категория:</label>
-        <input type="text" name="product_category" placeholder="{{ product.category }}" required>
+
+        <label for="product_category">Категория:</label>
+        <input type="text" id="product_category" name="product_category" value="{{ product.category }}" required>
         <br>
-        <label>Цена:</label>
-        <input type="number" name="product_price" placeholder="{{ product.price }}" required>
+
+        <label for="product_price">Цена:</label>
+        <input type="number" id="product_price" name="product_price" value="{{ product.price }}" min="0" required>
         <br>
-        <label>Количество:</label>
-        <input type="number" name="product_stock" placeholder="{{ product.stock }}" required>
+
+        <label for="product_stock">Количество:</label>
+        <input type="number" id="product_stock" name="product_stock" value="{{ product.stock }}" min="0" required>
         <br>
+
         <button type="submit">Сохранить</button>
     </form>
 
