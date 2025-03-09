@@ -1,0 +1,18 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+</head>
+<body>
+
+    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
+
+    {% for order in orders %}
+        <il>
+            {{ order.id }} - {{ order.order_total_price }}. Статус: {{ order.status }}
+        </il>
+        <br>
+    {% endfor %}
+</body>
+</html>

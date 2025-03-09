@@ -254,3 +254,10 @@ def product_edit_page(request, product_id):
             messages.success(request, 'Товар успешно изменен!')
             return redirect('seller_page', seller_id=user.id)
         return render(request, 'product_edit_page.html', {'product': product})
+
+def orders_list_page(request):
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    orders = Order.objects.filter(user=request.user)
+    return render(request, 'orders_list_page.html', {'orders': orders})
