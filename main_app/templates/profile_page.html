@@ -8,6 +8,8 @@
     <h2><a href="{% url 'home_page' %}">На главную</a></h2>
 
     <p>Вы вошли как: {{ user.username }}</p>
+    <a href="{% url 'orders_list_page' %}">Заказы</a>
+    <br>
     <a href="{% url 'logout' %}">Выйти</a>
 
 </html>
