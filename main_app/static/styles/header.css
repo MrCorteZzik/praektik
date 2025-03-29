@@ -1,0 +1,15 @@
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background-color: #344c11;
+    border-bottom: 1px solid #dee2e6;
+    opacity: 0.6;
+    border-radius: 15px;
+}
+
+.header img {
+    height: 50px;
+    margin-inline: 10px;
+} 

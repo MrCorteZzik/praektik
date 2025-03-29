@@ -1,10 +1,20 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Title</title>
+    <link rel="stylesheet" href="{% static 'styles/header.css' %}?v=2">
 </head>
 <body>
+    <div class="header">
+        <a href="{% url 'home_page' %}">
+            <img src="{% static 'images/Home_img.png' %}" alt="Home">
+        </a>
+    </div>
     <ul>
         <li>
             <a href="login/" class="btn btn-primary">Страница входа</a>

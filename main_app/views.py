@@ -8,12 +8,9 @@ from django.contrib.auth.models import User
 
 def home_page(request):
     if request.user.is_authenticated:
-        if Seller.objects.get(user_id=request.user.id).is_seller:
-            return render(request, 'index.html', {'is_seller': True})
-        else:
-            return render(request, 'index.html', {'is_seller': False})
-    else:
-        return render(request, 'index.html', {'is_seller': False})
+        user = Seller.objects.get(user_id=request.user.id)
+        return render(request, 'home_page.html', {'is_seller': user.is_seller})
+    return render(request, 'home_page.html', {'is_seller': False})
 
 def not_authenticated_profile_page(request):
     return render(request, 'not_authenticated_profile_page.html')
