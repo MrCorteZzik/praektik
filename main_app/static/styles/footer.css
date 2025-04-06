@@ -1,0 +1,20 @@
+.footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: #344c11;
+    border-bottom: 3px solid #dee2e6;
+    opacity: 0.75;
+    border-radius: 15px;
+}
+.footer_block{
+    background-color:#dee2e6;
+    height: 100px;
+    width: 50%;
+    align-items:flex-start;
+    opacity: 100%;
+    color: #344c11;
+    padding: 30 px;
+}
+

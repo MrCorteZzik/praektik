@@ -5,6 +5,31 @@
     <title>Вход</title>
 </head>
 <body>
+    <a href="{% url 'home_page' %}">
+        <img src="{% static 'images/Home_img.svg' %}" alt="Home">
+    </a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'profile_page' user.id %}">
+            <img src="{% static 'images/Profile_img.svg' %}" alt="Profile">
+        </a>
+    {% else %}
+        <a href="{% url 'not_authenticated_profile_page' %}">
+            <img src="{% static 'images/Profile_img.svg' %}" alt="Profile">
+        </a>
+    {% endif %}
+    <a href="{% url 'cart_page' %}">
+        <img src="{% static 'images/Cart_img.svg' %}" alt="Cart">
+    </a>
+    <div class="sign_up_and_sign_in">
+        <a href="{% url 'login_page' %}">
+            Sign in
+        </a>
+        <span>/</span>
+        <a href="{% url 'registration_page' %}">
+            Sign up
+        </a>
+    </div>
+
     <h2><a href="{% url 'home_page' %}">На главную</a></h2>
 
     <h2>Вход в аккаунт</h2>
