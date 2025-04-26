@@ -17,11 +17,8 @@
 .header img {
     height: 50px;
     margin-inline: 10px;
-} 
-.header img:hover{
-    animation: 500ms;
-    height:60px;
 }
+
 .sign_up_and_sign_in {
     position: absolute;
     right: 20px;
