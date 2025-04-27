@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from pyexpat.errors import messages
 from django.contrib import messages
@@ -137,14 +138,13 @@ def product_add_to_cart(request, product_id):
     if product.stock == 0:
         messages.error(request, 'Недостаточно товара в наличии!')
         return redirect('product_detail_page', product_id=product_id)
-    if CartItem.objects.filter(user=request.user, product=product, status=True).exists():
-        cart_item = CartItem.objects.filter(user=request.user, product=product, status=True)
-        for item in cart_item:
-            item.quantity += 1
-            item.save()
     else:
-        cart_item = CartItem.objects.create(user=request.user, product=product)
-        cart_item.save()
+        cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
+        if not created:
+            cart_item.quantity += 1
+            cart_item.save()
+        product.stock -= 1
+        product.save()
 
     return redirect('cart_page')
 
@@ -154,6 +154,9 @@ def product_remove_from_cart(request, product_id):
         return redirect('login_page')
 
     product = get_object_or_404(Product, id=product_id)
+
+    product.stock += CartItem.objects.get(user=request.user, product=product, status=True).quantity
+    product.save()
 
     cart_item = CartItem.objects.get(user=request.user, product=product, status=True)
     cart_item.delete()
@@ -170,8 +173,12 @@ def product_remove_one_from_cart(request, product_id):
     if cart_item.quantity > 1:
         cart_item.quantity -= 1
         cart_item.save()
+        product.stock += 1
+        product.save()
     else:
         cart_item.delete()
+        product.stock += 1
+        product.save()
 
     return redirect('cart_page')
 
@@ -185,6 +192,8 @@ def product_add_one_to_cart(request, product_id):
     if cart_item.quantity < product.stock:
         cart_item.quantity += 1
         cart_item.save()
+        product.stock -= 1
+        product.save()
     else:
         messages.error(request, 'Недостаточно товара в наличии!')
 
@@ -217,10 +226,6 @@ def order_success_page(request, order_id):
     products = []
     for item in cart_items:
         products.append(item.product)
-
-    for product in products:
-        product.stock -= CartItem.objects.get(user=request.user, product=product, status=True).quantity
-        product.save()
 
     CartItem.objects.filter(user=request.user).update(status=False)
 
