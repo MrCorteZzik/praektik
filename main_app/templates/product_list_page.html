@@ -1,21 +1,514 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Document</title>
-</head>
-<body>
 
-    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
 
-    <h1>Все товары</h1>
-    <ul>
-        {% for product in products %}
-            <il>
-                {{ product.name }} - {{ product.price }} В наличии: {{ product.stock }} <a href="{% url 'product_detail_page' product.id %}">Подробнее</a>
-            </il>
-            <br>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Каталог товаров | Маркетплейс{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Хлебные крошки -->
+    <nav class="flex mb-6 text-sm">
+        <a href="{% url 'home_page' %}" class="text-gray-500 hover:text-primary">Главная</a>
+        <span class="mx-2 text-gray-500">/</span>
+        <span class="text-gray-800">
+            {% if category %}
+                {{ category.name }}
+            {% else %}
+                Все товары
+            {% endif %}
+        </span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Фильтры -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow p-5 sticky top-6">
+                <h2 class="text-xl font-bold mb-4">Фильтры</h2>
+
+                <form id="filter-form" action="{% url 'product_list_page' %}" method="GET">
+                    <!-- Категории -->
+                    <div class="mb-5">
+                        <h3 class="font-semibold mb-2">Категории</h3>
+                        <div class="space-y-2">
+                            {% for cat in categories %}
+                            <div class="flex items-center">
+                                <input type="checkbox" id="category-{{ cat.id }}" name="category" value="{{ cat.slug }}"
+                                       class="h-4 w-4 text-primary focus:ring-primary"
+                                       {% if cat.slug == category.slug %}checked{% endif %}>
+                                <label for="category-{{ cat.id }}" class="ml-2 text-gray-700">{{ cat.name }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Цена -->
+                    <div class="mb-5">
+                        <h3 class="font-semibold mb-3">Цена</h3>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" name="min_price" placeholder="От" value="{{ request.GET.min_price }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary">
+                            <span class="text-gray-500">—</span>
+                            <input type="number" name="max_price" placeholder="До" value="{{ request.GET.max_price }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary">
+                        </div>
+                    </div>
+
+                    <!-- Рейтинг -->
+                    <div class="mb-5">
+                        <h3 class="font-semibold mb-2">Рейтинг</h3>
+                        <div class="space-y-2">
+                            {% for rating in "54321" %}
+                            <div class="flex items-center">
+                                <input type="checkbox" id="rating-{{ rating }}" name="rating" value="{{ rating }}"
+                                       class="h-4 w-4 text-primary focus:ring-primary"
+                                       {% if rating in request.GET.rating %}checked{% endif %}>
+                                <label for="rating-{{ rating }}" class="ml-2 text-gray-700 flex items-center">
+                                    <span class="flex text-yellow-400">
+                                        {% for i in "12345" %}
+                                            {% if i|add:"0" <= rating|add:"0" %}
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            {% else %}
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span class="ml-1 text-xs text-gray-500">и выше</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Продавец -->
+                    <div class="mb-5">
+                        <h3 class="font-semibold mb-2">Продавец</h3>
+                        <div class="space-y-2 max-h-40 overflow-y-auto">
+                            {% for seller in sellers %}
+                            <div class="flex items-center">
+                                <input type="checkbox" id="seller-{{ seller.id }}" name="seller" value="{{ seller.id }}"
+                                       class="h-4 w-4 text-primary focus:ring-primary"
+                                       {% if seller.id|stringformat:"s" in request.GET.seller %}checked{% endif %}>
+                                <label for="seller-{{ seller.id }}" class="ml-2 text-gray-700">{{ seller.name }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Наличие -->
+                    <div class="mb-5">
+                        <h3 class="font-semibold mb-2">Наличие</h3>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="in-stock" name="in_stock" value="1"
+                                   class="h-4 w-4 text-primary focus:ring-primary"
+                                   {% if request.GET.in_stock %}checked{% endif %}>
+                            <label for="in-stock" class="ml-2 text-gray-700">Только в наличии</label>
+                        </div>
+                    </div>
+
+                    <!-- Акции -->
+                    <div class="mb-5">
+                        <h3 class="font-semibold mb-2">Акции</h3>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="discount" name="discount" value="1"
+                                   class="h-4 w-4 text-primary focus:ring-primary"
+                                   {% if request.GET.discount %}checked{% endif %}>
+                            <label for="discount" class="ml-2 text-gray-700">Со скидкой</label>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 transition w-3/4">
+                            Применить
+                        </button>
+                        <button type="button" id="reset-filters" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition w-1/4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Список товаров -->
+        <div class="lg:col-span-3">
+            <!-- Заголовок и сортировка -->
+            <div class="flex flex-wrap justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">
+                    {% if category %}
+                        {{ category.name }}
+                    {% elif search_query %}
+                        Результаты поиска: "{{ search_query }}"
+                    {% else %}
+                        Все товары
+                    {% endif %}
+                    <span class="text-lg font-normal text-gray-500">({{ products|length }} товаров)</span>
+                </h1>
+
+                <div class="flex items-center space-x-4 mt-2 sm:mt-0">
+                    <label for="sort" class="text-gray-700">Сортировать:</label>
+                    <select id="sort" class="border-gray-300 rounded focus:ring-primary focus:border-primary">
+                        <option value="popular">Популярные</option>
+                        <option value="price_asc">Сначала дешевые</option>
+                        <option value="price_desc">Сначала дорогие</option>
+                        <option value="rating">По рейтингу</option>
+                        <option value="new">Новинки</option>
+                    </select>
+
+                    <div class="hidden md:flex items-center space-x-2">
+                        <button id="view-grid" class="p-2 rounded text-primary bg-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                            </svg>
+                        </button>
+                        <button id="view-list" class="p-2 rounded text-gray-500 hover:bg-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Примененные фильтры -->
+            {% if applied_filters %}
+            <div class="flex flex-wrap gap-2 mb-4">
+                {% for filter in applied_filters %}
+                <div class="bg-gray-100 rounded-full px-3 py-1 text-sm text-gray-700 flex items-center">
+                    <span>{{ filter.name }}: {{ filter.value }}</span>
+                    <button class="ml-1 text-gray-500 hover:text-gray-700" onclick="removeFilter('{{ filter.param }}', '{{ filter.value_param }}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                {% endfor %}
+                <button class="text-primary text-sm hover:underline" onclick="clearAllFilters()">
+                    Сбросить все фильтры
+                </button>
+            </div>
+            {% endif %}
+
+            <!-- Сетка товаров -->
+            <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {% for product in products %}
+                <div class="product-card bg-white rounded-lg shadow overflow-hidden transition duration-300 hover:shadow-lg transform hover:scale-[1.01]">
+                    <a href="{% url 'product_detail_page' product.id %}">
+                        <div class="relative">
+                            <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover">
+                            {% if product.discount_price %}
+                                <div class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-{{ product.discount_percent }}%</div>
+                            {% endif %}
+                            {% if product.is_new %}
+                                <div class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">Новинка</div>
+                            {% endif %}
+                        </div>
+                        <div class="p-4">
+                            <h3 class="text-sm font-medium mb-1 line-clamp-2 h-10">{{ product.name }}</h3>
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    {% for i in "12345" %}
+                                        {% if i|add:"0" <= product.rating %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        {% else %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="text-xs text-gray-500 ml-1">{{ product.rating }} ({{ product.reviews_count }})</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    {% if product.discount_price %}
+                                        <span class="text-gray-400 line-through text-xs">{{ product.price }} ₽</span>
+                                        <div class="text-lg font-bold text-primary">{{ product.discount_price }} ₽</div>
+                                    {% else %}
+                                        <div class="text-lg font-bold text-primary">{{ product.price }} ₽</div>
+                                    {% endif %}
+                                </div>
+                                <button class="add-to-cart bg-primary text-white p-2 rounded-full hover:bg-opacity-90 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-16">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h2 class="text-xl font-bold text-gray-700 mb-2">Товары не найдены</h2>
+                    <p class="text-gray-500 mb-4">К сожалению, по вашему запросу ничего не найдено</p>
+                    <a href="{% url 'product_list_page' %}" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
+                        Сбросить все фильтры
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Список товаров (альтернативный вид) -->
+            <div id="products-list" class="hidden space-y-4">
+                {% for product in products %}
+                <div class="product-list-item bg-white rounded-lg shadow overflow-hidden transition duration-300 hover:shadow-lg">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="relative md:w-1/4">
+                            <a href="{% url 'product_detail_page' product.id %}">
+                                <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="w-full h-48 md:h-full object-cover">
+                                {% if product.discount_price %}
+                                    <div class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-{{ product.discount_percent }}%</div>
+                                {% endif %}
+                                {% if product.is_new %}
+                                    <div class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">Новинка</div>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div class="p-4 flex-grow">
+                            <a href="{% url 'product_detail_page' product.id %}">
+                                <h3 class="text-lg font-medium mb-2">{{ product.name }}</h3>
+                            </a>
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    {% for i in "12345" %}
+                                        {% if i|add:"0" <= product.rating %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        {% else %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="text-xs text-gray-500 ml-1">{{ product.rating }} ({{ product.reviews_count }})</span>
+                            </div>
+                            <p class="text-gray-600 mb-4 line-clamp-2">{{ product.short_description }}</p>
+                            <div class="flex items-center text-sm text-gray-600 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>В наличии</span>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col justify-between border-t md:border-t-0 md:border-l">
+                            <div>
+                                {% if product.discount_price %}
+                                    <span class="text-gray-400 line-through text-sm">{{ product.price }} ₽</span>
+                                    <div class="text-2xl font-bold text-primary">{{ product.discount_price }} ₽</div>
+                                {% else %}
+                                    <div class="text-2xl font-bold text-primary">{{ product.price }} ₽</div>
+                                {% endif %}
+                            </div>
+                            <div class="flex flex-col space-y-2 mt-4">
+                                <button class="add-to-cart bg-primary text-white py-2 px-4 rounded-lg hover:bg-opacity-90 transition flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    В корзину
+                                </button>
+                                <a href="{% url 'product_detail_page' product.id %}" class="text-primary text-center py-2 px-4 border border-primary rounded-lg hover:bg-primary hover:text-white transition">
+                                    Подробнее
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-16">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h2 class="text-xl font-bold text-gray-700 mb-2">Товары не найдены</h2>
+                    <p class="text-gray-500 mb-4">К сожалению, по вашему запросу ничего не найдено</p>
+                    <a href="{% url 'product_list_page' %}" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
+                        Сбросить все фильтры
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Пагинация -->
+            <div class="mt-8 flex justify-center">
+                <nav class="flex items-center space-x-1">
+                    {% if products.has_previous %}
+                    <a href="?page={{ products.previous_page_number }}{{ current_filters }}" class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </a>
+                    {% endif %}
+
+                    {% for i in products.paginator.page_range %}
+                        {% if i == products.number %}
+                            <span class="px-3 py-1 rounded-md bg-primary text-white">{{ i }}</span>
+                        {% elif i > products.number|add:"-3" and i < products.number|add:"3" %}
+                            <a href="?page={{ i }}{{ current_filters }}" class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50">{{ i }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if products.has_next %}
+                    <a href="?page={{ products.next_page_number }}{{ current_filters }}" class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript для функциональности -->
+<script>
+    // Управление видом товаров (сетка/список)
+    document.getElementById('view-grid').addEventListener('click', function() {
+        document.getElementById('products-grid').classList.remove('hidden');
+        document.getElementById('products-list').classList.add('hidden');
+
+        document.getElementById('view-grid').classList.add('text-primary', 'bg-gray-100');
+        document.getElementById('view-grid').classList.remove('text-gray-500');
+
+        document.getElementById('view-list').classList.remove('text-primary', 'bg-gray-100');
+        document.getElementById('view-list').classList.add('text-gray-500');
+    });
+
+    document.getElementById('view-list').addEventListener('click', function() {
+        document.getElementById('products-grid').classList.add('hidden');
+        document.getElementById('products-list').classList.remove('hidden');
+
+        document.getElementById('view-list').classList.add('text-primary', 'bg-gray-100');
+        document.getElementById('view-list').classList.remove('text-gray-500');
+
+        document.getElementById('view-grid').classList.remove('text-primary', 'bg-gray-100');
+        document.getElementById('view-grid').classList.add('text-gray-500');
+    });
+
+    // Сортировка товаров
+    document.getElementById('sort').addEventListener('change', function() {
+        const url = new URL(window.location);
+        url.searchParams.set('sort', this.value);
+        window.location = url.toString();
+    });
+
+    // Установка текущей сортировки при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        const url = new URL(window.location);
+        const sortValue = url.searchParams.get('sort');
+
+        if (sortValue) {
+            document.getElementById('sort').value = sortValue;
+        }
+    });
+
+    // Сброс всех фильтров
+    document.getElementById('reset-filters').addEventListener('click', function() {
+        window.location = '{% url "product_list_page" %}';
+    });
+
+    // Функция для удаления фильтра
+    function removeFilter(param, valueParam) {
+        const url = new URL(window.location);
+
+        if (valueParam) {
+            let values = url.searchParams.getAll(param);
+            values = values.filter(value => value !== valueParam);
+
+            url.searchParams.delete(param);
+            values.forEach(value => {
+                url.searchParams.append(param, value);
+            });
+        } else {
+            url.searchParams.delete(param);
+        }
+
+        window.location = url.toString();
+    }
+
+    // Функция для очистки всех фильтров
+    function clearAllFilters() {
+        window.location = '{% url "product_list_page" %}';
+    }
+
+    // Анимированное добавление в корзину
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Анимация кнопки
+            this.classList.add('scale-110');
+            setTimeout(() => {
+                this.classList.remove('scale-110');
+            }, 200);
+
+            // Здесь будет код для добавления товара в корзину
+            const productId = this.closest('.product-card, .product-list-item').dataset.productId;
+
+            // Уведомление об успешном добавлении товара
+            showNotification('Товар добавлен в корзину');
+        });
+    });
+
+    // Функция для показа уведомлений
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-primary text-white py-2 px-4 rounded-lg shadow-lg transform transition-all duration-500 opacity-0 translate-y-[-20px] z-50';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        // Анимация появления
+        setTimeout(() => {
+            notification.classList.remove('opacity-0', 'translate-y-[-20px]');
+        }, 10);
+
+        // Анимация исчезновения
+        setTimeout(() => {
+            notification.classList.add('opacity-0', 'translate-y-[-20px]');
+            setTimeout(() => {
+                notification.remove();
+            }, 500);
+        }, 3000);
+    }
+</script>
+{% endblock %}
+
+
+
+
+
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1">-->
+<!--    <title>Document</title>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--    <h2><a href="{% url 'home_page' %}">На главную</a></h2>-->
+
+<!--    <h1>Все товары</h1>-->
+<!--    <ul>-->
+<!--        {% for product in products %}-->
+<!--            <il>-->
+<!--                {{ product.name }} - {{ product.price }} В наличии: {{ product.stock }} <a href="{% url 'product_detail_page' product.id %}">Подробнее</a>-->
+<!--            </il>-->
+<!--            <br>-->
+<!--        {% endfor %}-->
+<!--    </ul>-->
+<!--</body>-->
+<!--</html>-->
