@@ -93,8 +93,8 @@ def product_add_page(request):
             category = request.POST.get('category')
             price = request.POST.get('price')
             stock = request.POST.get('stock')
-
-            product = Product.objects.create(name=name, description=description, price=price, stock=stock, category=category, seller_id=request.user.id)
+            image = request.FILES.get('image')
+            product = Product.objects.create(name=name, description=description, price=price, stock=stock, image=image, category=category, seller_id=request.user.id)
             product.save()
 
             messages.success(request, 'Товар успешно добавлен!')
@@ -111,6 +111,13 @@ def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if request.user.is_authenticated:
         return render(request, 'product_detail_page.html', {'product': product})
+    else:
+        return redirect('login_page')
+
+def product_detail2(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    if request.user.is_authenticated:
+        return render(request, 'product_detail2.html', {'product': product})
     else:
         return redirect('login_page')
 
@@ -144,7 +151,6 @@ def product_add_to_cart(request, product_id):
         cart_item.save()
 
     return redirect('cart_page')
-
 
 def product_remove_from_cart(request, product_id):
     if not request.user.is_authenticated:
