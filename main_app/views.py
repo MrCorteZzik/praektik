@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from .models import Seller, Product, CartItem, Order
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 def home_page(request):
     if request.user.is_authenticated:
@@ -132,25 +133,34 @@ def cart_page(request):
     else:
         return render(request, 'cart_page.html', {'cart_items': None})
 
-def product_add_to_cart(request, product_id):
-    if not request.user.is_authenticated:
-        return redirect('login_page')
 
+def product_add_to_cart(request, product_id):
+    # Получение продукта
     product = get_object_or_404(Product, id=product_id)
 
-    if product.stock == 0:
-        messages.error(request, 'Недостаточно товара в наличии!')
-        return redirect('product_detail_page', product_id=product_id)
-    if CartItem.objects.filter(user=request.user, product=product, status=True).exists():
-        cart_item = CartItem.objects.filter(user=request.user, product=product, status=True)
-        for item in cart_item:
-            item.quantity += 1
-            item.save()
-    else:
-        cart_item = CartItem.objects.create(user=request.user, product=product)
+    # Получение количества из query-параметров
+    quantity = int(request.GET.get('quantity', 1))
+
+    # Создание или обновление элемента корзины
+    cart_item, created = CartItem.objects.get_or_create(
+        user=request.user,
+        product=product,
+        order=None,  # Поле order оставляем NULL
+        defaults={'quantity': quantity}
+    )
+
+    if not created:
+        cart_item.quantity += quantity
         cart_item.save()
 
-    return redirect('cart_page')
+    # Подсчёт общего количества товаров в корзине
+    cart_item_count = CartItem.objects.filter(user=request.user, order=None).count()
+
+    return JsonResponse({
+        'status': 'success',
+        'message': 'Товар добавлен в корзину',
+        'cart_item_count': cart_item_count
+    })
 
 def product_remove_from_cart(request, product_id):
     if not request.user.is_authenticated:
