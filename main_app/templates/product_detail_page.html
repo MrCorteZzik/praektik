@@ -411,15 +411,12 @@
 
         // Send POST request to add to cart
         fetch(cartUrl, {
-            method: 'POST',
+            method: 'Get',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}',
                 'X-Requested-With': 'XMLHttpRequest', // Ensure Django recognizes AJAX
             },
-            body: JSON.stringify({
-                product_id: productId,
-            }),
         })
         .then(response => {
             if (response.ok) {
