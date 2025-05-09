@@ -11,6 +11,7 @@ class Product(models.Model):
         'toys' : 'Игрушки',
         'books' : 'Книги',
         'auto' : 'Авто',
+        'food' : 'Продукты питания',
         'all' : 'Все категории',
     }
 

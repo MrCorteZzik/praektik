@@ -8,10 +8,12 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 
 def home_page(request):
+    products = Product.objects.all()[:4]
     if request.user.is_authenticated:
         user = Seller.objects.get(user_id=request.user.id)
-        return render(request, 'home_page.html', {'is_seller': user.is_seller})
-    return render(request, 'home_page.html', {'is_seller': False})
+        return render(request, 'home_page.html', {'products': products, 'is_seller': user.is_seller})
+
+    return render(request, 'home_page.html', {'products': products, 'is_seller': False})
 
 def not_authenticated_profile_page(request):
     return render(request, 'not_authenticated_profile_page.html')
@@ -87,19 +89,24 @@ def product_add_page(request):
     if not user.is_seller:
         messages.error(request, 'Вы не можете добавлять товары!')
         return redirect('home_page')
-    else:
-        if request.method == 'POST':
-            name = request.POST.get('name')
-            description = request.POST.get('description')
-            category = request.POST.get('category')
-            price = request.POST.get('price')
-            stock = request.POST.get('stock')
-            image = request.FILES.get('image')
-            product = Product.objects.create(name=name, description=description, price=price, stock=stock, image=image, category=category, seller_id=request.user.id)
-            product.save()
 
-            messages.success(request, 'Товар успешно добавлен!')
-        return render(request, 'product_add_page.html')
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        category = request.POST.get('category')
+        price = request.POST.get('price')
+        stock = request.POST.get('stock')
+        image = request.FILES.get('image')
+        product = Product.objects.create(name=name, description=description, price=price, stock=stock, image=image, category=category, seller_id=request.user.id)
+        product.save()
+
+        messages.success(request, 'Товар успешно добавлен!')
+        return redirect('profile_page', user_id=request.user.id)
+
+    context = {
+        'categories': Product.Categories,
+    }
+    return render(request, 'product_add_page.html', context)
 
 def product_list_page(request):
     products = Product.objects.all()
