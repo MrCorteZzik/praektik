@@ -165,6 +165,8 @@
                         </a>
                     {% endif %}
 
+
+
                     <a href="{% url 'cart_page' %}" class="flex flex-col items-center text-gray-700 hover:text-primary transition">
                         <div class="relative">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -231,19 +233,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Подписка на новости -->
-    <section class="bg-primary bg-opacity-10 py-10">
-        <div class="container mx-auto px-4">
-            <div class="max-w-2xl mx-auto text-center" data-aos="fade-up">
-                <h2 class="text-2xl font-bold mb-2">Подпишитесь на наши новости</h2>
-                <p class="text-gray-600 mb-6">Получайте информацию о новых товарах и специальных предложениях</p>
-                <form class="flex flex-col sm:flex-row gap-2">
-                    <input type="email" placeholder="Ваш email" class="flex-grow px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary">
-                    <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition btn-hover-effect">Подписаться</button>
-                </form>
-            </div>
-        </div>
-    </section>
+
 
     <!-- Футер -->
     <footer class="bg-primary text-white py-10">
@@ -402,3 +392,26 @@
     {% block extra_js %}{% endblock %}
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+    <!-- Подписка на новости -->
+<!--    <section class="bg-primary bg-opacity-10 py-10">-->
+<!--        <div class="container mx-auto px-4">-->
+<!--            <div class="max-w-2xl mx-auto text-center" data-aos="fade-up">-->
+<!--                <h2 class="text-2xl font-bold mb-2">Подпишитесь на наши новости</h2>-->
+<!--                <p class="text-gray-600 mb-6">Получайте информацию о новых товарах и специальных предложениях</p>-->
+<!--                <form class="flex flex-col sm:flex-row gap-2">-->
+<!--                    <input type="email" placeholder="Ваш email" class="flex-grow px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary">-->
+<!--                    <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition btn-hover-effect">Подписаться</button>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </section>-->
