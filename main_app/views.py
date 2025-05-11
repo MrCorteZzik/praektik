@@ -15,6 +15,7 @@ def home_page(request):
 
     return render(request, 'home_page.html', {'products': products, 'is_seller': False})
 
+
 def not_authenticated_profile_page(request):
     return render(request, 'not_authenticated_profile_page.html')
 
@@ -244,7 +245,8 @@ def order_success_page(request, order_id):
 
 def seller_page(request, seller_id):
     products = Product.objects.filter(seller_id=Seller.objects.get(user_id=seller_id).id)
-    return render(request, 'seller_page.html', {'products': products, 'seller_id': seller_id})
+
+    return render(request, 'seller_page.html', {'products': products, 'seller_id': seller_id, 'seller': Seller.objects.get(user_id=seller_id)})
 
 def product_edit_page(request, product_id):
     user = Seller.objects.get(user_id=request.user.id)
