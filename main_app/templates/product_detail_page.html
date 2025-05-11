@@ -115,14 +115,14 @@
                         </button>
                     </div>
 
-                    <button id="add-to-cart" class="flex-grow bg-primary text-white py-3 px-4 rounded-lg hover:bg-opacity-90 transition flex items-center justify-center transform hover:scale-105">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <a href="{% url 'product_add_to_cart' product.id %}">
-                            В корзину
-                        </a>
-                    </button>
+                    <a href="{% url 'product_add_to_cart' product.id %}">
+                        <button id="add-to-cart" class="flex-grow bg-primary text-white py-3 px-4 rounded-lg hover:bg-opacity-90 transition flex items-center justify-center transform hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                                В корзину
+                        </button>
+                    </a>
 
                     <button id="add-to-favorites" class="bg-white border border-gray-300 p-3 rounded-lg hover:bg-gray-50 transition transform hover:scale-105">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -347,180 +347,6 @@
     </section>
 </div>
 
-<!-- JavaScript для функциональности страницы товара -->
-<script>
-    // Функция для смены главного изображения товара
-    function changeMainImage(src) {
-        document.getElementById('main-product-image').src = src;
-
-        // Анимация смены изображения
-        const mainImage = document.getElementById('main-product-image');
-        mainImage.classList.add('opacity-0');
-        setTimeout(() => {
-            mainImage.src = src;
-            mainImage.classList.remove('opacity-0');
-        }, 300);
-    }
-
-    // Управление количеством товара
-    document.getElementById('decrease-quantity').addEventListener('click', function() {
-        const quantityInput = document.getElementById('quantity');
-        const currentValue = parseInt(quantityInput.value);
-        if (currentValue > 1) {
-            quantityInput.value = currentValue - 1;
-        }
-    });
-
-    document.getElementById('increase-quantity').addEventListener('click', function() {
-        const quantityInput = document.getElementById('quantity');
-        const currentValue = parseInt(quantityInput.value);
-        quantityInput.value = currentValue + 1;
-    });
-
-    // Переключение вкладок
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabButtons.forEach((button, index) => {
-        button.addEventListener('click', () => {
-            // Снятие активного состояния со всех вкладок
-            tabButtons.forEach(btn => {
-                btn.classList.remove('text-primary', 'border-b-2', 'border-primary');
-                btn.classList.add('text-gray-500');
-            });
-
-            // Скрытие всего содержимого
-            tabContents.forEach(content => {
-                content.classList.add('hidden');
-            });
-
-            // Активация выбранной вкладки
-            button.classList.remove('text-gray-500');
-            button.classList.add('text-primary', 'border-b-2', 'border-primary');
-
-            // Показ соответствующего содержимого
-            tabContents[index].classList.remove('hidden');
-        });
-    });
-
-    // Анимированное добавление в корзину
-    document.getElementById('add-to-cart').addEventListener('click', function(e) {
-        e.preventDefault();
-
-        // Button animation
-        this.classList.add('scale-105');
-        setTimeout(() => {
-            this.classList.remove('scale-105');
-        }, 200);
-
-        // Get product ID and quantity
-        const quantity = document.getElementById('quantity').value;
-        const productId = {{ product.id }};
-        const cartUrl = "{% url 'product_add_to_cart' product.id %}?quantity=" + encodeURIComponent(quantity);
-
-        // Send GET request to add to cart
-        fetch(cartUrl, {
-
-            method: 'GET',
-
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest', // Ensure Django recognizes AJAX
-            },
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                return response.json().then(data => {
-                    throw new Error(data.error || 'Failed to add product to cart');
-                });
-            }
-        })
-        .then(data => {
-            showNotification(data.message);
-            // Update cart counter if element exists
-            const cartCounter = document.getElementById('cart-counter');
-            if (cartCounter) {
-                cartCounter.textContent = data.cart_item_count;
-            }
-            // Redirect to cart page after delay to show notification
-            setTimeout(() => {
-                window.location.href = "{% url 'cart_page' %}";
-            }, 1000);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification(error.message, true);
-        });
-    });
-
-    // Notification function
-    function showNotification(message, isError = false) {
-        const notification = document.createElement('div');
-        notification.textContent = message;
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.right = '20px';
-        notification.style.padding = '10px 20px';
-        notification.style.backgroundColor = isError ? '#ff4444' : '#4CAF50';
-        notification.style.color = 'white';
-        notification.style.borderRadius = '5px';
-        notification.style.zIndex = '1000';
-        document.body.appendChild(notification);
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
-
-
-
-    // Анимированное добавление в избранное
-    document.getElementById('add-to-favorites').addEventListener('click', function(e) {
-        e.preventDefault();
-
-        // Анимация кнопки и смена иконки
-        this.classList.add('scale-105');
-        const svg = this.querySelector('svg');
-
-        if (svg.classList.contains('text-gray-500')) {
-            svg.classList.remove('text-gray-500');
-            svg.classList.add('text-red-500');
-            svg.setAttribute('fill', 'currentColor');
-            showNotification('Товар добавлен в избранное');
-        } else {
-            svg.classList.remove('text-red-500');
-            svg.classList.add('text-gray-500');
-            svg.setAttribute('fill', 'none');
-            showNotification('Товар удален из избранного');
-        }
-
-        setTimeout(() => {
-            this.classList.remove('scale-105');
-        }, 200);
-    });
-
-    // Функция для показа уведомлений
-    function showNotification(message) {
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-primary text-white py-2 px-4 rounded-lg shadow-lg transform transition-all duration-500 opacity-0 translate-y-[-20px]';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        // Анимация появления
-        setTimeout(() => {
-            notification.classList.remove('opacity-0', 'translate-y-[-20px]');
-        }, 10);
-
-        // Анимация исчезновения
-        setTimeout(() => {
-            notification.classList.add('opacity-0', 'translate-y-[-20px]');
-            setTimeout(() => {
-                notification.remove();
-            }, 500);
-        }, 3000);
-    }
-</script>
 {% endblock %}
 
 

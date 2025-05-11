@@ -127,41 +127,36 @@ def cart_page(request):
     if not request.user.is_authenticated:
         return redirect('login_page')
 
-    cart_items = CartItem.objects.filter(user_id=request.user.id, status=True)
-
-    if cart_items.exists():
+    if CartItem.objects.filter(user_id=request.user.id, status=True).exists():
+        cart_items = CartItem.objects.filter(user_id=request.user.id, status=True)
         return render(request, 'cart_page.html', {'cart_items': cart_items})
     else:
         return render(request, 'cart_page.html', {'cart_items': None})
 
 
 def product_add_to_cart(request, product_id):
-    # Получение продукта
+    if not request.user.is_authenticated:
+        redirect('login_page')
+
     product = get_object_or_404(Product, id=product_id)
 
-    # Получение количества из query-параметров
-    quantity = int(request.GET.get('quantity', 1))
+    if product.stock == 0:
+        return redirect('product_detail_page', product_id=product_id)
+    else:
+        if CartItem.objects.filter(product=product, user=request.user).exists() and product.stock > 1:
+            cart_item = CartItem.objects.get(product=product, user=request.user)
+            cart_item.quantity += 1
+            cart_item.save()
+            product.stock -= 1
+            product.save()
+            return redirect('cart_page')
+        else:
+            cart_item = CartItem.objects.create(product=product, user=request.user)
+            cart_item.save()
+            product.stock -= 1
+            product.save()
+            return redirect('cart_page')
 
-    # Создание или обновление элемента корзины
-    cart_item, created = CartItem.objects.get_or_create(
-        user=request.user,
-        product=product,
-        order=None,  # Поле order оставляем NULL
-        defaults={'quantity': quantity}
-    )
-
-    if not created:
-        cart_item.quantity += quantity
-        cart_item.save()
-
-    # Подсчёт общего количества товаров в корзине
-    cart_item_count = CartItem.objects.filter(user=request.user, order=None).count()
-
-    return JsonResponse({
-        'status': 'success',
-        'message': 'Товар добавлен в корзину',
-        'cart_item_count': cart_item_count
-    })
 
 def product_remove_from_cart(request, product_id):
     if not request.user.is_authenticated:
@@ -170,9 +165,12 @@ def product_remove_from_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
     cart_item = CartItem.objects.get(user=request.user, product=product, status=True)
+    product.stock += cart_item.quantity
+    product.save()
     cart_item.delete()
 
     return redirect('cart_page')
+
 
 def product_remove_one_from_cart(request, product_id):
     if not request.user.is_authenticated:
@@ -184,8 +182,12 @@ def product_remove_one_from_cart(request, product_id):
     if cart_item.quantity > 1:
         cart_item.quantity -= 1
         cart_item.save()
+        product.stock += 1
+        product.save()
     else:
         cart_item.delete()
+        product.stock += 1
+        product.save()
 
     return redirect('cart_page')
 
@@ -196,11 +198,11 @@ def product_add_one_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
     cart_item = CartItem.objects.get(user=request.user, product=product, status=True)
-    if cart_item.quantity < product.stock:
+    if product.stock > 0:
         cart_item.quantity += 1
         cart_item.save()
-    else:
-        messages.error(request, 'Недостаточно товара в наличии!')
+        product.stock -= 1
+        product.save()
 
     return redirect('cart_page')
 
