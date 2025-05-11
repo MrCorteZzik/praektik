@@ -19,8 +19,15 @@
         <div class="space-y-4">
 
              <div class="bg-white rounded-lg shadow overflow-hidden">
-                <img id="main-product-image" src="{{ 1.webp }}"
-                    alt="{{ product.name }}" class="w-full h-96 object-contain p-4">
+
+
+             {% if product.image %}
+                <img id="main-product-image" src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-96 object-contain p-4 rounded-md">
+            {% else %}
+                <img src="{% static 'images/placeholder.jpg' %}" alt="Нет изображения" class="w-full h-96 object-contain p-4 rounded-md">
+            {% endif %}
+
+
             </div>
             <div class="grid grid-cols-5 gap-2">
                 {% for image in product.images.all %}
