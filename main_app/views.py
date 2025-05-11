@@ -1,20 +1,20 @@
 from django.contrib.auth import authenticate
-from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from pyexpat.errors import messages
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from .models import Seller, Product, CartItem, Order
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 def home_page(request):
+    products = Product.objects.all()[:4]
     if request.user.is_authenticated:
-        if Seller.objects.get(user_id=request.user.id).is_seller:
-            return render(request, 'index.html', {'is_seller': True})
-        else:
-            return render(request, 'index.html', {'is_seller': False})
-    else:
-        return render(request, 'index.html', {'is_seller': False})
+        user = Seller.objects.get(user_id=request.user.id)
+        return render(request, 'home_page.html', {'products': products, 'is_seller': user.is_seller})
+
+    return render(request, 'home_page.html', {'products': products, 'is_seller': False})
+
 
 def not_authenticated_profile_page(request):
     return render(request, 'not_authenticated_profile_page.html')
@@ -90,19 +90,24 @@ def product_add_page(request):
     if not user.is_seller:
         messages.error(request, 'Вы не можете добавлять товары!')
         return redirect('home_page')
-    else:
-        if request.method == 'POST':
-            name = request.POST.get('name')
-            description = request.POST.get('description')
-            category = request.POST.get('category')
-            price = request.POST.get('price')
-            stock = request.POST.get('stock')
 
-            product = Product.objects.create(name=name, description=description, price=price, stock=stock, category=category, seller_id=request.user.id)
-            product.save()
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        category = request.POST.get('category')
+        price = request.POST.get('price')
+        stock = request.POST.get('stock')
+        image = request.FILES.get('image')
+        product = Product.objects.create(name=name, description=description, price=price, stock=stock, image=image, category=category, seller_id=request.user.id)
+        product.save()
 
-            messages.success(request, 'Товар успешно добавлен!')
-        return render(request, 'product_add_page.html')
+        messages.success(request, 'Товар успешно добавлен!')
+        return redirect('profile_page', user_id=request.user.id)
+
+    context = {
+        'categories': Product.Categories,
+    }
+    return render(request, 'product_add_page.html', context)
 
 def product_list_page(request):
     products = Product.objects.all()
@@ -118,35 +123,40 @@ def product_detail(request, product_id):
     else:
         return redirect('login_page')
 
+
 def cart_page(request):
     if not request.user.is_authenticated:
         return redirect('login_page')
 
-    cart_items = CartItem.objects.filter(user_id=request.user.id, status=True)
-
-    if cart_items.exists():
+    if CartItem.objects.filter(user_id=request.user.id, status=True).exists():
+        cart_items = CartItem.objects.filter(user_id=request.user.id, status=True)
         return render(request, 'cart_page.html', {'cart_items': cart_items})
     else:
         return render(request, 'cart_page.html', {'cart_items': None})
 
+
 def product_add_to_cart(request, product_id):
     if not request.user.is_authenticated:
-        return redirect('login_page')
+        redirect('login_page')
 
     product = get_object_or_404(Product, id=product_id)
 
     if product.stock == 0:
-        messages.error(request, 'Недостаточно товара в наличии!')
         return redirect('product_detail_page', product_id=product_id)
     else:
-        cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
-        if not created:
+        if CartItem.objects.filter(product=product, user=request.user).exists() and product.stock > 1:
+            cart_item = CartItem.objects.get(product=product, user=request.user)
             cart_item.quantity += 1
             cart_item.save()
-        product.stock -= 1
-        product.save()
-
-    return redirect('cart_page')
+            product.stock -= 1
+            product.save()
+            return redirect('cart_page')
+        else:
+            cart_item = CartItem.objects.create(product=product, user=request.user)
+            cart_item.save()
+            product.stock -= 1
+            product.save()
+            return redirect('cart_page')
 
 
 def product_remove_from_cart(request, product_id):
@@ -155,13 +165,13 @@ def product_remove_from_cart(request, product_id):
 
     product = get_object_or_404(Product, id=product_id)
 
-    product.stock += CartItem.objects.get(user=request.user, product=product, status=True).quantity
-    product.save()
-
     cart_item = CartItem.objects.get(user=request.user, product=product, status=True)
+    product.stock += cart_item.quantity
+    product.save()
     cart_item.delete()
 
     return redirect('cart_page')
+
 
 def product_remove_one_from_cart(request, product_id):
     if not request.user.is_authenticated:
@@ -189,13 +199,11 @@ def product_add_one_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
     cart_item = CartItem.objects.get(user=request.user, product=product, status=True)
-    if cart_item.quantity < product.stock:
+    if product.stock > 0:
         cart_item.quantity += 1
         cart_item.save()
         product.stock -= 1
         product.save()
-    else:
-        messages.error(request, 'Недостаточно товара в наличии!')
 
     return redirect('cart_page')
 
@@ -227,13 +235,18 @@ def order_success_page(request, order_id):
     for item in cart_items:
         products.append(item.product)
 
+    for product in products:
+        product.stock -= CartItem.objects.get(user=request.user, product=product, status=True).quantity
+        product.save()
+
     CartItem.objects.filter(user=request.user).update(status=False)
 
     return render(request, 'order_success_page.html', {'order': order})
 
 def seller_page(request, seller_id):
     products = Product.objects.filter(seller_id=Seller.objects.get(user_id=seller_id).id)
-    return render(request, 'seller_page.html', {'products': products, 'seller_id': seller_id})
+
+    return render(request, 'seller_page.html', {'products': products, 'seller_id': seller_id, 'seller': Seller.objects.get(user_id=seller_id)})
 
 def product_edit_page(request, product_id):
     user = Seller.objects.get(user_id=request.user.id)
@@ -259,10 +272,3 @@ def product_edit_page(request, product_id):
             messages.success(request, 'Товар успешно изменен!')
             return redirect('seller_page', seller_id=user.id)
         return render(request, 'product_edit_page.html', {'product': product})
-
-def orders_list_page(request):
-    if not request.user.is_authenticated:
-        return redirect('login_page')
-
-    orders = Order.objects.filter(user=request.user)
-    return render(request, 'orders_list_page.html', {'orders': orders})

@@ -2,10 +2,23 @@ from django.contrib.auth.models import User
 from django.db import models
 
 class Product(models.Model):
+    Categories = {
+        'electronics' : 'Электроника',
+        'clothes' : 'Одежда',
+        'house_and_garden' : 'Дом и сад',
+        'beauty' : 'Красота',
+        'sport' : 'Спорт',
+        'toys' : 'Игрушки',
+        'books' : 'Книги',
+        'auto' : 'Авто',
+        'food' : 'Продукты питания',
+        'all' : 'Все категории',
+    }
+
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=30)
     description = models.TextField(max_length=200)
-    category = models.CharField(max_length=100)
+    category = models.CharField(max_length=100, choices=Categories.items(), default='all')
     image = models.ImageField(upload_to='images/')
     price = models.IntegerField()
     stock = models.IntegerField()
@@ -31,6 +44,6 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     status = models.BooleanField(default=True)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True, blank=True, related_name='items')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
     def cart_item_total_price(self):
         return self.product.price * self.quantity

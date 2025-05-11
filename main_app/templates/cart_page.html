@@ -1,37 +1,252 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <h2><a href="{% url 'home_page' %}">На главную</a></h2>
+{% extends 'index.html' %}
+{% load static %}
 
-    <h1>Корзина</h1>
+{% block title %}Корзина | Маркетплейс{% endblock %}
 
-    <ul>
-        {% if cart_items is None %}
-            <h3>Корзина пуста</h3>
-            <br>
-            <h2><a href="{% url 'product_list_page' %}">Все товары</a></h2>
-        {% else %}
-            {% for item in cart_items %}
-                <il>
-                    {{ item.product.name }} - {{ item.product.price }} руб. - {{ item.quantity }} шт. Итого: {{ item.cart_item_total_price }}
-                    <br>
-                    <a href="{% url 'product_remove_from_cart' item.product.id %}">Удалить</a>
-                    <a href="{% url 'product_remove_one_from_cart' item.product.id %}">Убрать</a>
-                    <a href="{% url 'product_add_one_to_cart' item.product.id %}">Добавить</a>
-                    <br>
-                </il>
-            {% endfor %}
-            {% if messages %}
-                {% for message in messages %}
-                    <p style="color: red;">{{ message }}</p>
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Хлебные крошки -->
+    <nav class="flex mb-6 text-sm">
+        <a href="{% url 'home_page' %}" class="text-gray-500 hover:text-primary">Главная</a>
+        <span class="mx-2 text-gray-500">/</span>
+        <span class="text-gray-800">Корзина</span>
+    </nav>
+
+    <h1 class="text-2xl font-bold mb-6">Корзина</h1>
+
+    {% if cart_items is None or not cart_items %}
+    <!-- Пустая корзина -->
+    <div class="bg-white rounded-lg shadow p-8 text-center">
+        <div class="flex flex-col items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">Ваша корзина пуста</h3>
+            <p class="text-gray-500 mb-6">Добавьте товары в корзину, чтобы оформить заказ</p>
+            <a href="{% url 'product_list_page' %}" class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition transform hover:scale-[1.01] inline-flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+                Перейти к товарам
+            </a>
+        </div>
+
+        <!-- Рекомендуемые товары -->
+        <div class="mt-12">
+            <h2 class="text-xl font-bold mb-6 text-left">Рекомендуемые товары</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {% for i in "1234" %}
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden transition duration-300 hover:shadow-lg transform hover:scale-[1.01]">
+                    <a href="{% url 'product_list_page' %}">
+                        <div class="relative">
+                            <img src="/placeholder.svg?height=200&width=300" alt="Рекомендуемый товар" class="w-full h-40 object-cover">
+                            <div class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-15%</div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="text-sm font-medium mb-1 line-clamp-2 h-10">Рекомендуемый товар {{ i }}</h3>
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    {% for j in "12345" %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    {% endfor %}
+                                </div>
+                                <span class="text-xs text-gray-500 ml-1">5.0 (42)</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-gray-400 line-through text-xs">2999 ₽</span>
+                                    <div class="text-lg font-bold text-primary">2499 ₽</div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
                 {% endfor %}
-            {% endif %}
-            <h2><a href="{% url 'order_page' %}">Оформить заказ</a></h2>
-        {% endif %}
-    </ul>
-</body>
-</html>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Корзина с товарами -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Товары в корзине -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="p-4 border-b flex items-center justify-between">
+                    <h2 class="font-medium">Товары в корзине</h2>
+                    <span class="text-gray-500">{{ cart_items|length }} товаров</span>
+                </div>
+
+                <div id="cart-items" class="divide-y">
+                    {% for item in cart_items %}
+                    <div class="cart-item p-4 flex flex-col md:flex-row items-start" data-id="{{ item.product.id }}" data-price="{{ item.product.price }}" data-quantity="{{ item.quantity }}">
+                        <div class="flex flex-grow flex-col md:flex-row md:items-center">
+                            <div class="w-full md:w-24 h-24 flex-shrink-0 mb-4 md:mb-0 md:mr-4">
+                                {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-full h-full object-contain">
+                                {% else %}
+                                <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="text-lg font-medium mb-1">{{ item.product.name }}</h3>
+                                <div class="text-sm text-gray-500 mb-4">
+                                    <p>Продавец: {{ item.product.seller.username|default:"Маркетплейс" }}</p>
+                                </div>
+                                <div class="flex items-center justify-between md:hidden mb-4">
+                                    <div class="flex items-center border rounded-lg">
+                                        <a href="{% url 'product_remove_one_from_cart' item.product.id %}" class="quantity-decrease px-3 py-1 text-gray-600 hover:bg-gray-100 transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                            </svg>
+                                        </a>
+                                        <span class="quantity w-12 text-center">{{ item.quantity }}</span>
+                                        <a href="{% url 'product_add_one_to_cart' item.product.id %}" class="quantity-increase px-3 py-1 text-gray-600 hover:bg-gray-100 transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <div class="text-xl font-bold text-primary">{{ item.product.price }} ₽</div>
+                                    </div>
+                                </div>
+                                <a href="{% url 'product_remove_from_cart' item.product.id %}" class="remove-item text-red-500 hover:text-red-600 text-sm inline-flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Удалить
+                                </a>
+                            </div>
+                            <div class="hidden md:flex items-center space-x-8 ml-4">
+                                <div class="flex items-center border rounded-lg">
+                                    <a href="{% url 'product_remove_one_from_cart' item.product.id %}" class="quantity-decrease px-3 py-1 text-gray-600 hover:bg-gray-100 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                        </svg>
+                                    </a>
+                                    <span class="quantity w-12 text-center">{{ item.quantity }}</span>
+                                    <a href="{% url 'product_add_one_to_cart' item.product.id %}" class="quantity-increase px-3 py-1 text-gray-600 hover:bg-gray-100 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </a>
+                                </div>
+                                <div>
+                                    <div class="text-xl font-bold text-primary">{{ item.product.price }} ₽</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="p-4 bg-gray-50 flex justify-between items-center">
+                    <a href="{% url 'product_list_page' %}" class="text-primary hover:underline flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Продолжить покупки
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Итоговая информация и оформление -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow p-5 sticky top-6">
+                <h2 class="text-lg font-bold mb-4">Итого</h2>
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Товары ({{ cart_items|length }}):</span>
+                        <span id="subtotal">
+                            {% with total=0 %}
+                                {% for item in cart_items %}
+                                    {% with item_total=item.cart_item_total_price %}
+                                        {% with total=total|add:item_total %}{% endwith %}
+                                    {% endwith %}
+                                {% endfor %}
+                                {{ total }} ₽
+                            {% endwith %}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Скидка:</span>
+                        <span id="discount" class="text-green-600">0 ₽</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Доставка:</span>
+                        <span id="shipping">0 ₽</span>
+                    </div>
+                </div>
+                <div class="flex justify-between text-xl font-bold mb-6">
+                    <span>К оплате:</span>
+                    <span id="total">
+                        {% with total=0 %}
+                            {% for item in cart_items %}
+                                {% with item_total=item.cart_item_total_price|default:0 %}
+                                    {% with total=total|add:item_total %}{% endwith %}
+                                {% endwith %}
+                            {% endfor %}
+                            {{ total }} ₽
+                        {% endwith %}
+                    </span>
+                </div>
+                <div class="space-y-3">
+                    <a href="{% url 'order_page' %}" class="bg-primary text-white py-3 w-full rounded-lg hover:bg-opacity-90 transition flex items-center justify-center transform hover:scale-[1.01]">
+                        Оформить заказ
+                    </a>
+                </div>
+
+                <!-- Промокод -->
+                <div class="mt-6 pt-6 border-t">
+                    <h3 class="font-semibold mb-3">Промокод</h3>
+                    <form class="flex space-x-2">
+                        <input type="text" placeholder="Введите промокод" class="flex-grow px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary">
+                        <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Безопасность платежа -->
+                <div class="mt-6 text-center">
+                    <div class="flex items-center justify-center text-gray-500 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Безопасный платеж
+                    </div>
+                    <div class="flex justify-center mt-2 space-x-2">
+                        <div class="bg-white p-1 rounded shadow">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-10" viewBox="0 0 24 24" fill="#1434CB">
+                                <rect width="24" height="24" rx="4" fill="white"/>
+                                <path d="M10 8H14V16H10V8Z" fill="#1434CB"/>
+                                <path d="M15.5 8C14.7 8 14 8.3 14 9C14 9.7 14.7 10 15.5 10C16.3 10 17 9.7 17 9C17 8.3 16.3 8 15.5 8Z" fill="#F9A51A"/>
+                                <path d="M8.5 8C7.7 8 7 8.3 7 9C7 9.7 7.7 10 8.5 10C9.3 10 10 9.7 10 9C10 8.3 9.3 8 8.5 8Z" fill="#F9A51A"/>
+                            </svg>
+                        </div>
+                        <div class="bg-white p-1 rounded shadow">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-10" viewBox="0 0 24 24" fill="#EB001B">
+                                <rect width="24" height="24" rx="4" fill="white"/>
+                                <circle cx="9" cy="12" r="4" fill="#EB001B"/>
+                                <circle cx="15" cy="12" r="4" fill="#F79E1B"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
