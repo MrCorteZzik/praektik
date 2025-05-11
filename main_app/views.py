@@ -122,12 +122,6 @@ def product_detail(request, product_id):
     else:
         return redirect('login_page')
 
-def product_detail2(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    if request.user.is_authenticated:
-        return render(request, 'product_detail2.html', {'product': product})
-    else:
-        return redirect('login_page')
 
 def cart_page(request):
     if not request.user.is_authenticated:
