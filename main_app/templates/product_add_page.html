@@ -89,6 +89,64 @@
                         </div>
                     </div>
 
+
+
+                    <div class="container mx-auto px-4 py-6">
+
+                        <div class="max-w-4xl mx-auto">
+                            <h1 class="text-2xl font-bold mb-6">Добавление нового товара</h1>
+
+                            {% if messages %}
+                            <div class="mb-6">
+                                {% for message in messages %}
+                                    <div class="{% if message.tags == 'success' %}bg-green-100 border border-green-400 text-green-700{% else %}bg-red-100 border border-red-400 text-red-700{% endif %} px-4 py-3 rounded relative" role="alert">
+                                        <span class="block sm:inline">{{ message }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <div class="bg-white rounded-lg shadow overflow-hidden">
+                                <div class="p-6">
+                                    <form method="post" enctype="multipart/form-data" class="space-y-6">
+                                        {% csrf_token %}
+                                        {{ product_form.as_p }}
+
+                                        <div>
+                                            <label for="images" class="block text-sm font-medium text-gray-700 mb-1">Изображения товара*</label>
+                                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                                                <div class="space-y-1 text-center">
+                                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                    <div class="flex text-sm text-gray-600">
+                                                        <label for="images" class="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-dark focus-within:outline-none">
+                                                            <span>Загрузить файлы</span>
+                                                            <input id="images" name="images" type="file" accept="image/*" multiple class="sr-only">
+                                                        </label>
+                                                        <p class="pl-1">или перетащите сюда</p>
+                                                    </div>
+                                                    <p class="text-xs text-gray-500">PNG, JPG, GIF до 5MB</p>
+                                                </div>
+                                            </div>
+                                            <div id="image-previews" class="mt-3 grid grid-cols-3 gap-2"></div>
+                                        </div>
+
+                                        <div class="flex justify-end space-x-3">
+                                            <a href="{% url 'profile_page' user.id %}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                                                Отмена
+                                            </a>
+                                            <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition transform hover:scale-[1.01]">
+                                                Добавить товар
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                     <div class="flex justify-end space-x-3">
                         <a href="{% url 'profile_page' user.id %}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
                             Отмена
@@ -171,6 +229,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('images');
+    const previewsContainer = document.getElementById('image-previews');
+
+    imageInput.addEventListener('change', function() {
+        previewsContainer.innerHTML = ''; // Очищаем предыдущие предпросмотры
+        const files = this.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('div');
+                preview.className = 'relative';
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'h-20 w-auto object-contain';
+                img.alt = 'Предпросмотр';
+                preview.appendChild(img);
+                previewsContainer.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const imageInput = document.getElementById('images');
+        if (!imageInput.files.length) {
+            e.preventDefault();
+            alert('Пожалуйста, загрузите хотя бы одно изображение!');
+        }
+    });
 </script>
 {% endblock %}
 

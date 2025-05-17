@@ -3,27 +3,38 @@ from django.db import models
 
 class Product(models.Model):
     Categories = {
-        'electronics' : 'Электроника',
-        'clothes' : 'Одежда',
-        'house_and_garden' : 'Дом и сад',
-        'beauty' : 'Красота',
-        'sport' : 'Спорт',
-        'toys' : 'Игрушки',
-        'books' : 'Книги',
-        'auto' : 'Авто',
-        'food' : 'Продукты питания',
-        'all' : 'Все категории',
+        'electronics': 'Электроника',
+        'clothes': 'Одежда',
+        'house_and_garden': 'Дом и сад',
+        'beauty': 'Красота',
+        'sport': 'Спорт',
+        'toys': 'Игрушки',
+        'books': 'Книги',
+        'auto': 'Авто',
+        'food': 'Продукты питания',
+        'all': 'Все категории',
     }
 
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=30)
     description = models.TextField(max_length=200)
     category = models.CharField(max_length=100, choices=Categories.items(), default='all')
-    image = models.ImageField(upload_to='images/')
     price = models.IntegerField()
     stock = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     seller = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='images/')
+
+    def __str__(self):
+        return f"Image for {self.product.name}"
+
+
 
 class Seller(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

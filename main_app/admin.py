@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'description', 'category', 'image', 'price', 'stock', 'created_at', 'seller')
+    list_display = ('id', 'name', 'description', 'category', 'price', 'stock', 'created_at', 'seller')
     list_filter = ('category', 'created_at')
     search_fields = ('id', 'name')
 

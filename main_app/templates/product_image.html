@@ -1,0 +1,81 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} | Маркетплейс{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Хлебные крошки -->
+    <nav class="flex mb-6 text-sm">
+        <a href="{% url 'home_page' %}" class="text-gray-500 hover:text-primary">Главная</a>
+        <span class="mx-2 text-gray-500">/</span>
+        <a href="{% url 'product_list_page' %}" class="text-gray-500 hover:text-primary">Товары</a>
+        <span class="mx-2 text-gray-500">/</span>
+        <span class="text-gray-800">{{ product.name }}</span>
+    </nav>
+
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow overflow-hidden">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold mb-4">{{ product.name }}</h1>
+
+            <!-- Карусель изображений -->
+            <div class="relative">
+                <div class="carousel overflow-hidden relative">
+                    {% for image in product.images.all %}
+                        <img src="{{ image.image.url }}" alt="{{ product.name }}" class="carousel-item w-full h-96 object-contain hidden">
+                    {% empty %}
+                        <img src="{% static 'images/placeholder.jpg' %}" alt="Нет изображения" class="carousel-item w-full h-96 object-contain">
+                    {% endfor %}
+                </div>
+                {% if product.images.all|length > 1 %}
+                    <button class="carousel-prev absolute top-1/2 left-0 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-r-lg hover:bg-gray-700">‹</button>
+                    <button class="carousel-next absolute top-1/2 right-0 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-l-lg hover:bg-gray-700">›</button>
+                {% endif %}
+            </div>
+
+            <div class="mt-6">
+                <p class="text-gray-700 mb-2"><strong>Цена:</strong> {{ product.price }} ₽</p>
+                <p class="text-gray-700 mb-2"><strong>Категория:</strong> {{ product.get_category_display }}</p>
+                <p class="text-gray-700 mb-2"><strong>Описание:</strong> {{ product.description }}</p>
+                <p class="text-gray-700 mb-2"><strong>В наличии:</strong> {{ product.stock }} шт.</p>
+                <a href="{% url 'seller_page' product.seller.id %}" class="text-primary hover:underline">Посмотреть продавца</a>
+            </div>
+
+            <div class="mt-6">
+                <form action="{% url 'product_add_to_cart' product.id %}" method="GET" class="flex items-center space-x-4">
+                    <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="w-20 px-2 py-1 border rounded-lg">
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90">Добавить в корзину</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.querySelector('.carousel');
+    const items = carousel.querySelectorAll('.carousel-item');
+    const prevBtn = document.querySelector('.carousel-prev');
+    const nextBtn = document.querySelector('.carousel-next');
+    let currentIndex = 0;
+
+    if (items.length > 0) {
+        items[currentIndex].classList.remove('hidden');
+
+        if (prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', function() {
+                items[currentIndex].classList.add('hidden');
+                currentIndex = (currentIndex - 1 + items.length) % items.length;
+                items[currentIndex].classList.remove('hidden');
+            });
+
+            nextBtn.addEventListener('click', function() {
+                items[currentIndex].classList.add('hidden');
+                currentIndex = (currentIndex + 1) % items.length;
+                items[currentIndex].classList.remove('hidden');
+            });
+        }
+    }
+});
+</script>
+{% endblock %}
