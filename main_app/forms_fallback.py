@@ -1,9 +1,6 @@
 from django import forms
 from .models import Product, ProductImage
 import mimetypes
-import logging
-
-logger = logging.getLogger(__name__)
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -11,21 +8,26 @@ class ProductForm(forms.ModelForm):
         fields = ['name', 'description', 'category', 'price', 'stock']
 
 class ProductImageForm(forms.Form):
-    images = forms.FileField(
-        widget=forms.FileInput(attrs={'multiple': True, 'accept': 'image/*'}),
-        label='Изображения',
+    image1 = forms.FileField(
+        widget=forms.FileInput(attrs={'accept': 'image/*'}),
+        label='Изображение 1',
         required=True
     )
+    image2 = forms.FileField(
+        widget=forms.FileInput(attrs={'accept': 'image/*'}),
+        label='Изображение 2',
+        required=False
+    )
+    image3 = forms.FileField(
+        widget=forms.FileInput(attrs={'accept': 'image/*'}),
+        label='Изображение 3',
+        required=False
+    )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        logger.debug(f"Django version: {forms.__version__}")
-        logger.debug(f"Widget class: {self.fields['images'].widget.__class__.__name__}")
-        logger.debug(f"Widget attrs: {self.fields['images'].widget.attrs}")
-
-    def clean_images(self):
-        images = self.files.getlist('images')
-        logger.debug(f"Received images: {[img.name for img in images]}")
+    def clean(self):
+        cleaned_data = super().clean()
+        images = [cleaned_data.get('image1'), cleaned_data.get('image2'), cleaned_data.get('image3')]
+        images = [img for img in images if img]  # Remove None values
         if not images:
             raise forms.ValidationError('Пожалуйста, загрузите хотя бы одно изображение.')
         for image in images:
@@ -34,4 +36,5 @@ class ProductImageForm(forms.Form):
             mime_type, _ = mimetypes.guess_type(image.name)
             if not mime_type or mime_type not in ['image/png', 'image/jpeg', 'image/gif']:
                 raise forms.ValidationError('Поддерживаются только PNG, JPEG и GIF!')
-        return images
+        cleaned_data['images'] = images
+        return cleaned_data
