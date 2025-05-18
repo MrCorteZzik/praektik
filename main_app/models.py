@@ -24,6 +24,7 @@ class Product(models.Model):
     stock = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     seller = models.ForeignKey(User, on_delete=models.CASCADE)
+    guarantee = models.IntegerField(default=0)
 
 class Seller(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

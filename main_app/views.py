@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 
 def home_page(request):
-    products = Product.objects.all()[:4]
+    products = Product.objects.all()[3:8]
     if request.user.is_authenticated:
         user = Seller.objects.get(user_id=request.user.id)
         return render(request, 'home_page.html', {'products': products, 'is_seller': user.is_seller})
@@ -20,7 +20,7 @@ def not_authenticated_profile_page(request):
     return render(request, 'not_authenticated_profile_page.html')
 
 def profile_page(request, user_id):
-    return render(request, 'profile_page.html')
+    return render(request, 'profile_page.html', {'seller_id': user_id})
 
 def login_page(request):
     if request.user.is_authenticated:
@@ -261,14 +261,21 @@ def product_edit_page(request, product_id):
             category = request.POST.get('product_category')
             price = request.POST.get('product_price')
             stock = request.POST.get('product_stock')
+            guarantee = request.POST.get('product_guarantee')
 
             product.name = name
             product.description = description
             product.category = category
             product.price = price
             product.stock = stock
+            product.guarantee=guarantee
             product.save()
 
             messages.success(request, 'Товар успешно изменен!')
             return redirect('seller_page', seller_id=user.id)
-        return render(request, 'product_edit_page.html', {'product': product})
+        return render(request, 'product_edit_page.html', {'product': product, 'categories': Product.Categories,})
+
+def delete_product(_, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    product.delete()
+    return redirect('seller_page', seller_id=product.seller.id)
