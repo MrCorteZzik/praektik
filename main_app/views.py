@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.cache import never_cache
 from pyexpat.errors import messages
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -8,7 +9,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 
 def home_page(request):
-    products = Product.objects.all()[3:8]
+    products = Product.objects.all()[2:8]
     if request.user.is_authenticated:
         user = Seller.objects.get(user_id=request.user.id)
         return render(request, 'home_page.html', {'products': products, 'is_seller': user.is_seller})
@@ -124,6 +125,7 @@ def product_detail(request, product_id):
         return redirect('login_page')
 
 
+@never_cache
 def cart_page(request):
     if not request.user.is_authenticated:
         return redirect('login_page')
@@ -216,7 +218,7 @@ def order_page(request):
         return render(request, 'order_page.html', {'order': order})
     else:
         order = Order.objects.create(user=request.user)
-        CartItem.objects.filter(user=request.user, status=True).update(order=order)
+        CartItem.objects.filter(user=request.user, status=True).update(order=order, status=False)
         order.save()
         return render(request, 'order_page.html', {'order': order})
 
